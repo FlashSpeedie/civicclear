@@ -437,10 +437,8 @@ export function PrivacyReviewView({
       const result = scanForPrivacyConcerns(sourceBlocks);
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setScanResult(result);
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setScanned(true);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sourceBlocks, scanned]);
 
   const redactedText = scanResult
@@ -498,6 +496,7 @@ export function PrivacyReviewView({
               checked={privacyConfirmed}
               onChange={(e) => setPrivacyConfirmed(e.target.checked)}
               className="mt-0.5 h-4 w-4 rounded border-[var(--color-border)] text-[var(--color-forest)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-forest-pale)]"
+              aria-required="true"
             />
             <div>
               <p className="font-medium text-[var(--color-ink)]">I understand my document text will be sent to Google Gemini for analysis</p>
@@ -526,15 +525,20 @@ export function PrivacyReviewView({
           </div>
         </div>
 
-        <div className="mt-6 flex flex-wrap gap-3">
+        <div className="mt-6 flex flex-wrap items-center gap-3">
           <Button variant="secondary" onClick={onBack}>
             <ChevronLeft className="w-4 h-4" aria-hidden="true" />
             Back
           </Button>
-          <Button onClick={handleConfirm} disabled={!privacyConfirmed}>
+          <Button onClick={handleConfirm} disabled={!privacyConfirmed} aria-describedby={!privacyConfirmed ? 'consent-required-hint' : undefined}>
             Make this understandable
             <ArrowRight className="w-4 h-4" aria-hidden="true" />
           </Button>
+          {!privacyConfirmed && (
+            <p id="consent-required-hint" className="text-sm text-[var(--color-ink-muted)]" role="status">
+              Check the confirmation box to continue.
+            </p>
+          )}
         </div>
       </Section>
     </div>

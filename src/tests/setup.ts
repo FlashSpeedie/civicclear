@@ -1,4 +1,4 @@
-import '@testing-library/jest-dom';
+import '@testing-library/jest-dom/vitest';
 import { vi } from 'vitest';
 
 Object.defineProperty(window, 'matchMedia', {
@@ -15,11 +15,12 @@ Object.defineProperty(window, 'matchMedia', {
   })),
 });
 
-Object.defineProperty(window, 'navigator', {
-  writable: true,
-  value: {
-    clipboard: {
+if (!navigator.clipboard || !navigator.clipboard.writeText) {
+  Object.defineProperty(navigator, 'clipboard', {
+    writable: true,
+    configurable: true,
+    value: {
       writeText: vi.fn().mockResolvedValue(undefined),
     },
-  },
-});
+  });
+}

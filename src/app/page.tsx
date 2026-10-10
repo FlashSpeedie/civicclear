@@ -47,31 +47,31 @@ export default function Home() {
   }, []);
 
   const setSourceBlocks = useCallback((blocks: SourceBlock[] | ((prev: SourceBlock[]) => SourceBlock[])) => {
-    updateState({ sourceBlocks: typeof blocks === 'function' ? blocks(state.sourceBlocks) : blocks });
+    setState((prev) => ({ ...prev, sourceBlocks: typeof blocks === 'function' ? blocks(prev.sourceBlocks) : blocks }));
   }, []);
 
   const setOriginalText = useCallback((text: string | ((prev: string) => string)) => {
-    updateState({ originalText: typeof text === 'function' ? text(state.originalText) : text });
+    setState((prev) => ({ ...prev, originalText: typeof text === 'function' ? text(prev.originalText) : text }));
   }, []);
 
   const setEditedText = useCallback((text: string | ((prev: string) => string)) => {
-    updateState({ editedText: typeof text === 'function' ? text(state.editedText) : text });
+    setState((prev) => ({ ...prev, editedText: typeof text === 'function' ? text(prev.editedText) : text }));
   }, []);
 
   const setPrivacyConfirmed = useCallback((confirmed: boolean | ((prev: boolean) => boolean)) => {
-    updateState({ privacyConfirmed: typeof confirmed === 'function' ? confirmed(state.privacyConfirmed) : confirmed });
+    setState((prev) => ({ ...prev, privacyConfirmed: typeof confirmed === 'function' ? confirmed(prev.privacyConfirmed) : confirmed }));
   }, []);
 
   const setUserContext = useCallback((context: string | ((prev: string) => string)) => {
-    updateState({ userContext: typeof context === 'function' ? context(state.userContext) : context });
+    setState((prev) => ({ ...prev, userContext: typeof context === 'function' ? context(prev.userContext) : context }));
   }, []);
 
   const setUserRole = useCallback((role: string | ((prev: string) => string)) => {
-    updateState({ userRole: typeof role === 'function' ? role(state.userRole) : role });
+    setState((prev) => ({ ...prev, userRole: typeof role === 'function' ? role(prev.userRole) : role }));
   }, []);
 
   const setReferenceDate = useCallback((date: string | ((prev: string) => string)) => {
-    updateState({ referenceDate: typeof date === 'function' ? date(state.referenceDate) : date });
+    setState((prev) => ({ ...prev, referenceDate: typeof date === 'function' ? date(prev.referenceDate) : date }));
   }, []);
 
   const handleStart = () => {
