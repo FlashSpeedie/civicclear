@@ -448,7 +448,8 @@ export function PrivacyReviewView({
     : editedText;
 
   const handleConfirm = () => {
-    setPrivacyConfirmed(true);
+    if (!privacyConfirmed) return;
+    onNext();
   };
 
   return (

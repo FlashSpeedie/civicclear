@@ -95,6 +95,7 @@ export default function Home() {
   };
 
   const handleContextNext = async () => {
+    if (state.isLoading) return;
     updateState({ step: 'analyzing', isLoading: true, error: null });
 
     try {
@@ -109,10 +110,19 @@ export default function Home() {
         }),
       });
 
-      const data = await response.json();
+      let data: { analysis?: DocumentAnalysis; error?: string } = {};
+      try {
+        data = await response.json();
+      } catch {
+        throw new Error('The analysis service returned an unreadable response. Please try again.');
+      }
 
       if (!response.ok) {
         throw new Error(data.error || 'Analysis failed');
+      }
+
+      if (!data.analysis) {
+        throw new Error('The analysis service returned an empty result. Please try again.');
       }
 
       updateState({
