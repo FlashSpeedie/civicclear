@@ -86,14 +86,13 @@ describe('App end-to-end flow', () => {
     expect(await screen.findByText(/review extracted text/i)).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: /^continue$/i }));
 
-    // Privacy step: the analyze button must be disabled until consent is given
+    // Privacy step: the confirm button is always clickable, with a hint until consent is given
     expect(await screen.findByText(/privacy checkpoint/i)).toBeInTheDocument();
+    expect(screen.getByText(/check the confirmation box/i)).toBeInTheDocument();
     const confirmButton = screen.getByRole('button', { name: /make this understandable/i });
-    expect(confirmButton).toBeDisabled();
 
     const checkbox = screen.getByRole('checkbox');
     fireEvent.click(checkbox);
-    expect(confirmButton).toBeEnabled();
 
     fireEvent.click(confirmButton);
 
@@ -115,7 +114,7 @@ describe('App end-to-end flow', () => {
     expect(body.sourceBlocks[0].text).toContain('14 calendar days');
   });
 
-  it('blocks the confirm button and shows why when consent is missing', async () => {
+  it('requires consent and shows feedback when the button is clicked without it', async () => {
     global.fetch = vi.fn();
     render(<Home />);
 
@@ -127,15 +126,21 @@ describe('App end-to-end flow', () => {
 
     expect(await screen.findByText(/privacy checkpoint/i)).toBeInTheDocument();
     const confirmButton = screen.getByRole('button', { name: /make this understandable/i });
-    expect(confirmButton).toBeDisabled();
 
-    // Clicking the disabled button must not advance or call fetch
+    // A hint is visible before consent
+    expect(screen.getByText(/check the confirmation box/i)).toBeInTheDocument();
+
+    // Clicking without consent shows an explicit error and does not advance
     fireEvent.click(confirmButton);
+    expect(await screen.findByText(/please confirm the checkbox above before continuing/i)).toBeInTheDocument();
     expect(screen.queryByText(/what are you trying to figure out/i)).not.toBeInTheDocument();
     expect(global.fetch).not.toHaveBeenCalled();
 
-    // There is a visible hint explaining the requirement
-    expect(screen.getByText(/check the confirmation box/i)).toBeInTheDocument();
+    // Checking the box clears the error and the click advances
+    fireEvent.click(screen.getByRole('checkbox'));
+    expect(screen.queryByText(/please confirm the checkbox above/i)).not.toBeInTheDocument();
+    fireEvent.click(confirmButton);
+    expect(await screen.findByText(/what are you trying to figure out/i)).toBeInTheDocument();
   });
 
   it('shows the server error on the context step when analysis fails', async () => {

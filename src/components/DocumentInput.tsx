@@ -431,6 +431,8 @@ export function PrivacyReviewView({
   const [scanResult, setScanResult] = useState<PrivacyScanResult | null>(null);
   const [showRedacted, setShowRedacted] = useState(false);
   const [scanned, setScanned] = useState(false);
+  const [consentError, setConsentError] = useState<string | null>(null);
+  const consentRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!scanned && sourceBlocks.length > 0) {
@@ -446,7 +448,12 @@ export function PrivacyReviewView({
     : editedText;
 
   const handleConfirm = () => {
-    if (!privacyConfirmed) return;
+    if (!privacyConfirmed) {
+      setConsentError('Please confirm the checkbox above before continuing. Your document text is only sent to Gemini after you confirm.');
+      consentRef.current?.focus();
+      return;
+    }
+    setConsentError(null);
     onNext();
   };
 
@@ -494,15 +501,25 @@ export function PrivacyReviewView({
             <input
               type="checkbox"
               checked={privacyConfirmed}
-              onChange={(e) => setPrivacyConfirmed(e.target.checked)}
+              onChange={(e) => {
+                setPrivacyConfirmed(e.target.checked);
+                if (e.target.checked) setConsentError(null);
+              }}
               className="mt-0.5 h-4 w-4 rounded border-[var(--color-border)] text-[var(--color-forest)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-forest-pale)]"
               aria-required="true"
+              aria-invalid={consentError ? 'true' : 'false'}
+              ref={consentRef}
             />
             <div>
               <p className="font-medium text-[var(--color-ink)]">I understand my document text will be sent to Google Gemini for analysis</p>
               <p className="text-sm text-[var(--color-ink-muted)]">I have reviewed the text and redacted any sensitive details I don&apos;t want to share</p>
             </div>
           </label>
+          {consentError && (
+            <p role="alert" className="mt-2 text-sm text-[var(--color-error)]">
+              {consentError}
+            </p>
+          )}
         </div>
 
         <div className="border border-[var(--color-border)] rounded-lg overflow-hidden">
@@ -530,11 +547,11 @@ export function PrivacyReviewView({
             <ChevronLeft className="w-4 h-4" aria-hidden="true" />
             Back
           </Button>
-          <Button onClick={handleConfirm} disabled={!privacyConfirmed} aria-describedby={!privacyConfirmed ? 'consent-required-hint' : undefined}>
+          <Button onClick={handleConfirm} aria-describedby={!privacyConfirmed ? 'consent-required-hint' : undefined}>
             Make this understandable
             <ArrowRight className="w-4 h-4" aria-hidden="true" />
           </Button>
-          {!privacyConfirmed && (
+          {!privacyConfirmed && !consentError && (
             <p id="consent-required-hint" className="text-sm text-[var(--color-ink-muted)]" role="status">
               Check the confirmation box to continue.
             </p>
